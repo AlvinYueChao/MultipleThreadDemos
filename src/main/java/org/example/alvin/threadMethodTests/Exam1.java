@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.Date;
 
 @Slf4j
-public class exam1 {
+public class Exam1 {
     public static void main(String[] args) throws InterruptedException {
         // 方法甲
         long startTime1 = new Date().getTime();
