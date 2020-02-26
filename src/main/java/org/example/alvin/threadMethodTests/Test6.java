@@ -14,33 +14,42 @@ public class Test6 {
     }
 
     public static class TwoPhaseTermination {
-        private Thread minitor;
+        /**
+         * volatile适用于仅有一个线程写，多个线程读的场景
+         * volatile关键字只能保证线程之间的可见性，不能保证原子性
+         */
+        private volatile boolean shouldStop;
+        private boolean starting;
+        private Thread monitor;
 
-        public void start(){
-            minitor = new Thread("monitor thread"){
-                @Override
-                public void run() {
-                    while (true){
-                        Thread current = Thread.currentThread();
-                        if (current.isInterrupted()){
-                            log.debug("被打断了，清理后续...");
-                            break;
-                        }
-                        try {
-                            Thread.sleep(1000);
-                            log.debug("执行监控步骤...");
-                        } catch (InterruptedException e) {
-                            current.interrupt();
-                            e.printStackTrace();
-                        }
+        public void start() {
+            synchronized (this) {
+                if (starting) {
+                    return;
+                }
+                starting = true;
+            }
+            monitor = new Thread(() -> {
+                while (true) {
+                    if (shouldStop) {
+                        log.debug("清理后续...");
+                        break;
+                    }
+                    try {
+                        Thread.sleep(1000);
+                        log.debug("执行监控步骤...");
+                    } catch (InterruptedException e) {
+                        shouldStop = true;
                     }
                 }
-            };
-            minitor.start();
+            }, "monitor");
+            monitor.start();
         }
 
-        public void stop(){
-            minitor.interrupt();
+        public void stop() {
+            log.debug("停止监控");
+            shouldStop = true;
+            monitor.interrupt();
         }
     }
 }
