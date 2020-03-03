@@ -1,4 +1,4 @@
-package org.example.alvin.threadPool;
+package org.example.alvin.customThreadPool;
 
 @FunctionalInterface
 public interface RejectPolicy<T> {
